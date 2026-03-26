@@ -4,7 +4,7 @@
 - **测试日期**: 2026-03-26
 - **测试目标**: 在“行业复杂问题盲测”下验证各 Custom Agent 能否按契约协作、是否能理解并使用积木库、以及是否需要补充 Skills。
 - **业务背景**: 能源：配电房巡检缺陷检测与安全作业卡（缺陷检测→风险分级→自动作业卡→闭环复核）
-- **当前阶段**: Phase 2（实现产物已生成，等待人工复核是否进入验证与部署）
+- **当前阶段**: Phase 3（验证与部署产物已生成，等待人工验收线上验证点）
 
 ## 2. Agent 调用追踪
 
@@ -15,8 +15,8 @@
 | Phase 2 | `backend-architect` | `supabase/migrations/*` | [x] 已生成 | 输出至 `supabase/migrations/20260326003000_energy_inspection_schema.sql`；不包含 Change Detection 后端实现，仅预留可选字段。 |
 | Phase 2 | `frontend-architect` | `src/app/*` | [x] 已生成 | 新增 Admin/Web 页面，缺陷页明确“ChangeFormer：待接入/占位，且不影响分级”。 |
 | Phase 2 | `ui-designer` | 组件/样式优化 | [ ] 跳过执行 | 本轮目标侧重工作流鲁棒性与契约一致性，暂不做视觉深化。 |
-| Phase 3 | `api-test-pro` | `tests/e2e/*` | [ ] 待执行 | 必须覆盖 P0 验收条件的 E2E。 |
-| Phase 3 | `devops-architect` | 部署与环境变量 | [ ] 待执行 | 与 Vercel + Supabase 实际环境对齐。 |
+| Phase 3 | `api-test-pro` | `tests/e2e/*` | [x] 已生成 | 新增 `tests/e2e/energy-inspection.spec.ts` 与 `playwright.config.ts`；已加 `pnpm test:e2e` 脚本。 |
+| Phase 3 | `devops-architect` | 部署与环境变量 | [x] 已生成 | 新增 `docs/ops/run02-deploy-checklist.md`，并补齐 `/api/health`、`/api/version` 线上验证点。 |
 
 ## 3. 问题与修复日志 (Issue & Fix Tracker)
 
@@ -26,6 +26,7 @@
 - **[状态: 🟢] [问题ID: #004]** Phase 2 代码构建失败：`src/app/layout.tsx` 引用 globals.css 路径错误。 -> **修复措施**: 修正为 `./globals.css` 并通过 `pnpm build`。
 - **[状态: 🟢] [问题ID: #005]** Phase 2 代码构建失败：globals.css 中使用了 Tailwind v4 风格 `@apply border-border` 等导致编译报错。 -> **修复措施**: 移除相关 `@apply` 并保留最小可构建样式。
 - **[状态: 🟢] [问题ID: #006]** Phase 2 代码构建失败：TypeScript 6 对 `moduleResolution=node10` 与 `target=es5` 报 deprecation。 -> **修复措施**: `tsconfig.json` 改为 `moduleResolution=bundler` 与 `target=es2017`。
+- **[状态: 🟢] [问题ID: #007]** Phase 3 构建失败：Next 类型检查包含了 `playwright.config.ts` 并触发类型不兼容。 -> **修复措施**: 收敛 `tsconfig.json include` 到 `src/**` 并显式 exclude `playwright.config.ts` 与 `tests/**`，`pnpm build` 通过。
 
 ## 4. Phase 级人工审核 (Human Checkpoints)
 

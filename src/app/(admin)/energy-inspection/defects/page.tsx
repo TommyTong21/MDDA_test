@@ -33,14 +33,18 @@ function riskBadgeClass(risk: Defect["riskLevel"]): string {
   }
 }
 
-export default function DefectsPage({
+export default async function DefectsPage({
   searchParams,
 }: {
-  searchParams?: Record<string, string | string[] | undefined>
+  // Next.js 16（App Router）中 searchParams 可能为 Promise，需要先解包再读取。
+  searchParams?:
+    | Promise<Record<string, string | string[] | undefined>>
+    | Record<string, string | string[] | undefined>
 }) {
   const deviceById = new Map(mockDevices.map((d) => [d.id, d]))
   const inspectionById = new Map(mockInspections.map((i) => [i.id, i]))
-  const defectId = getSingleParam(searchParams, "defectId")
+  const resolvedSearchParams = await Promise.resolve(searchParams)
+  const defectId = getSingleParam(resolvedSearchParams, "defectId")
   const selected = defectId ? mockDefects.find((d) => d.id === defectId) : undefined
 
   return (
