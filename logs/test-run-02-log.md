@@ -28,6 +28,7 @@
 - **[状态: 🟢] [问题ID: #006]** Phase 2 代码构建失败：TypeScript 6 对 `moduleResolution=node10` 与 `target=es5` 报 deprecation。 -> **修复措施**: `tsconfig.json` 改为 `moduleResolution=bundler` 与 `target=es2017`。
 - **[状态: 🟢] [问题ID: #007]** Phase 3 构建失败：Next 类型检查包含了 `playwright.config.ts` 并触发类型不兼容。 -> **修复措施**: 收敛 `tsconfig.json include` 到 `src/**` 并显式 exclude `playwright.config.ts` 与 `tests/**`，`pnpm build` 通过。
 - **[状态: 🟡 待解决] [问题ID: #008]** Phase 3 线上验证失败：Vercel 部署访问根域名返回 `404: NOT_FOUND`，且 Build Log 显示 `Build Completed in /vercel/output [18ms]` + `Skipping cache upload because no files were prepared`。已确认 Vercel Root Directory 被配置为 `src/app/(admin)`（该目录不包含 package.json），导致 Vercel 无法识别 Next.js 工程。 -> **修复措施**: 人工调整 Vercel Project Settings：Root Directory 改为仓库根目录 `.`（或留空），Framework 选 Next.js，Install/Build 使用 pnpm，然后重新 Deploy。
+- **[状态: 🟢] [问题ID: #009]** Phase 3 线上内容偏差：部署成功但根路径 `/` 显示旧的 “Routing Collab Demo”。 -> **修复措施**: 将 `src/app/(web)/page.tsx` 改为 `redirect('/energy-inspection')` 并推送触发重新部署。
 
 ## 4. Phase 级人工审核 (Human Checkpoints)
 
