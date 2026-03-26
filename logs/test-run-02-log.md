@@ -23,6 +23,9 @@
 - **[状态: 🟢] [问题ID: #001]** `discovery-orchestrator` 输出路径偏离（生成 `cases/`）。 -> **修复措施**: 已更新其 Prompt，强制输出到 `docs/prd/` 并移除 `cases/` 约定。
 - **[状态: 🟢] [问题ID: #002]** Phase 1 人工反馈要求在“缺陷检测”中补充“历史对比变化检测（ChangeFormer）”。 -> **修复措施**: 已回传给 `discovery-orchestrator` 并完成 PRD 原地修订（新增流程 3a + FR-5a + 风险项）。
 - **[状态: 🟢] [问题ID: #003]** Phase 2 人工反馈：Change Detection 本轮不做后端实现，只在前端体现占位 UI。 -> **修复措施**: 已回传给 `architecture-designer` 并完成 ADR 原地修订（明确本期非目标，Task Breakdown 调整）。 
+- **[状态: 🟢] [问题ID: #004]** Phase 2 代码构建失败：`src/app/layout.tsx` 引用 globals.css 路径错误。 -> **修复措施**: 修正为 `./globals.css` 并通过 `pnpm build`。
+- **[状态: 🟢] [问题ID: #005]** Phase 2 代码构建失败：globals.css 中使用了 Tailwind v4 风格 `@apply border-border` 等导致编译报错。 -> **修复措施**: 移除相关 `@apply` 并保留最小可构建样式。
+- **[状态: 🟢] [问题ID: #006]** Phase 2 代码构建失败：TypeScript 6 对 `moduleResolution=node10` 与 `target=es5` 报 deprecation。 -> **修复措施**: `tsconfig.json` 改为 `moduleResolution=bundler` 与 `target=es2017`。
 
 ## 4. Phase 级人工审核 (Human Checkpoints)
 
