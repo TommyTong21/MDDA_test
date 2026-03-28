@@ -69,6 +69,13 @@
 
 ## 3. 核心交付物
 
+### 3.0 TypeScript 类型纪律（强制）
+
+- 快跑（Fast Lane）：允许 `any` 触发 warn，但不鼓励使用；优先用 `unknown + type guard` 或 `Record<string, unknown>`，并保证 `pnpm lint:fast` 可通过。
+- 严检（Strict Lane）：禁止使用 `any`（包括 `as any`），并保证 `pnpm lint:strict` 可通过。
+- API 错误与响应采用判别联合（discriminated union），不要用 `any` 兜底。
+- 从 URLSearchParams / 表单 / JSON 读取数据时先用 `unknown` + type guard 收敛类型，再进入业务逻辑。
+
 ### 3.1 页面实现
 
 **文件位置**：`src/app/{route}/page.tsx`（或 `layout.tsx`）

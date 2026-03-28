@@ -118,6 +118,27 @@ SOLO Coder 在转交 Agent 前必须验证：
 ### 2.4 Maker-Checker 与显式确认（新增）
 - Maker-Checker：初版 → Review → 修订 → 用户确认 → 冻结
 - 显式确认检查点（CP1-CP8）：范围确认、差异化确认、实现深度、PRD 冻结、UI 确认、API 契约确认、Demo 验收、迭代前确认
+
+### 2.5 工程门禁（分快跑/严检两档）
+
+为了满足“25 分钟内完成主体 + 10 分钟内部署”的目标，门禁分两档运行，避免被非关键规则卡死。
+
+**快跑（Fast Lane）**：用于“能跑起来 + 能上线验证”
+- 必须通过：
+  - `pnpm lint:fast`（允许部分规则降级为 warn，例如 `no-explicit-any`）
+  - `pnpm build`
+- 推荐通过（不阻断）：`pnpm test:e2e`
+
+**严检（Strict Lane）**：用于“正式测试 / 准入”
+- 必须通过：
+  - `pnpm lint:strict`（严格模式，`no-explicit-any` 等规则为 error）
+  - `pnpm build`
+  - `pnpm test:e2e`（至少 smoke）
+
+**规则处理原则**
+- 快跑阶段允许“警告先行”，但禁止通过“全局关闭规则”掩盖问题；只允许按模式降级。
+- 进入严检前必须清零关键警告（优先清 `any`、鉴权/输入校验、幂等/一致性相关问题）。
+- 优先复用积木：`.trae/blocks/tech-lead/typescript-lint-playbook.md`
 - 默认规则：24 小时无反馈默认继续；未明确深度默认按 MVP 实现
 
 ---

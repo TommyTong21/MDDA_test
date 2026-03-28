@@ -72,6 +72,16 @@
 
 ## 3. 核心交付物
 
+### 3.0 TypeScript 类型纪律（强制）
+
+- 快跑（Fast Lane）：允许 `any` 触发 warn，但不鼓励使用；输入解析优先 `unknown + type guard`（或 `Record<string, unknown>`），并保证 `pnpm lint:fast` 可通过。
+- 严检（Strict Lane）：禁止使用 `any`（包括 `as any`、函数参数 `any`、`safeJson<any>` 等），并保证 `pnpm lint:strict` 可通过。
+- 请求体解析必须使用 `unknown` + type guard（或 `Record<string, unknown>`）再读取字段；不要把不确定数据当作强类型直接用。
+- 动态路由 Route Handler 注意 Next.js 16 的 `context.params` 可能为 Promise 形态，推荐：
+  - `export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) { const { id } = await params }`
+- 半结构化 JSON（如 evidence/impact/raw_payload）统一用 `Record<string, unknown>`，不要用 `any`。
+- 禁止把 “修复 lint” 通过关闭规则解决；如确需例外，必须在 ADR/变更请求记录理由与影响。
+
 ### 3.1 数据库 Schema
 
 **文件位置**：`supabase/migrations/{timestamp}_{description}.sql`

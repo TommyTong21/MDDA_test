@@ -1,0 +1,57 @@
+case_id: "20260328-eldercare-caregiver-assistant"
+version: "0.1.0"
+updated_at: "2026-03-28"
+
+dimensions:
+  stakeholder_map:
+    - id: "STK-CG"
+      role: "护工"
+      pain_points:
+        - "记录工具分散且输入成本高"
+        - "事件上报链路长，容易错过黄金时间"
+        - "交接靠口头，重复解释、遗漏频发"
+    - id: "STK-NUR"
+      role: "护士/护士站"
+      pain_points:
+        - "信息不集中，查找与确认耗时"
+        - "异常被淹没或通知不到位"
+    - id: "STK-MGR"
+      role: "护士长/管理者"
+      pain_points:
+        - "难以量化追踪质量与响应"
+
+  critical_scenarios:
+    - id: "CG-REC-001"
+      name: "护工现场快速记录"
+      description: "语音/文本/图片输入→结构化提取→确认提交→可追溯留痕"
+    - id: "CG-INC-001"
+      name: "紧急上报"
+      description: "30 秒内上报→自动触达→事件状态流转闭环"
+    - id: "CG-HO-001"
+      name: "交接补充"
+      description: "自动汇总 + 人工补充→交接存档→可检索"
+    - id: "CG-TASK-001"
+      name: "最小任务提醒（可选）"
+      description: "今日待办→完成勾选→附加记录"
+
+  hard_limits:
+    - "弱网/噪声环境，交互必须低输入成本"
+    - "IT 团队小，优先 SaaS 化与低运维"
+    - "健康/隐私数据需安全传输与最小权限访问"
+
+  success_metrics:
+    - id: "MVP-REC-TIME"
+      target: "护工单次记录平均耗时下降 ≥ 40%"
+      measurement_method: "进入记录页到提交成功的时长分布"
+    - id: "MVP-INC-NOTIFY"
+      target: "紧急上报通知到达 < 30 秒"
+      measurement_method: "事件创建时间与接收方首次拉取/确认时间差"
+    - id: "MVP-HO-MISS"
+      target: "交接重点事项遗漏率下降 ≥ 30%"
+      measurement_method: "交接后复盘抽样：关键事项对齐率"
+
+  open_questions:
+    - "试点院区的登录方式偏好：短信 OTP 还是邮箱？"
+    - "护工与老人责任范围的定义口径：按楼层/站点/分组？"
+    - "紧急上报通知渠道：仅 App 内通知，还是需要短信/电话兜底？"
+

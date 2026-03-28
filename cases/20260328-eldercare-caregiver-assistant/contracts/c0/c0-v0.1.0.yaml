@@ -1,0 +1,88 @@
+contract_kind: "c0"
+case_id: "20260328-eldercare-caregiver-assistant"
+version: "0.1.0"
+status: "draft"
+created_at: "2026-03-28"
+
+problem_space:
+  business_context:
+    - "全国性康养医疗机构，覆盖多城市，老年服务规模 10 万+"
+    - "护理分级 L1–L6，护理记录以纸质 + Excel + 分散系统并行"
+    - "一线人力紧张，记录与沟通挤压真实照护时间"
+  stakeholder_map:
+    - role: "护工"
+      pain_points:
+        - "记录工具分散且输入成本高"
+        - "事件上报链路长，容易错过黄金时间"
+        - "交接靠口头，重复解释、遗漏频发"
+    - role: "护士/护士站"
+      pain_points:
+        - "信息不集中，查找与确认耗时"
+        - "异常被淹没或通知不到位"
+    - role: "护士长/管理者"
+      pain_points:
+        - "难以量化追踪质量与响应"
+  critical_scenarios:
+    - scenario_id: "CG-REC-001"
+      description: "护工现场快速记录（语音/文本/图片）→结构化提取→确认提交→可追溯留痕"
+    - scenario_id: "CG-INC-001"
+      description: "紧急上报（30 秒内）→自动触达责任护士/护士站→事件状态流转闭环"
+    - scenario_id: "CG-HO-001"
+      description: "交接补充（自动汇总 + 人工补充）→交接存档→可检索与回放"
+    - scenario_id: "CG-TASK-001"
+      description: "最小任务提醒（可选）→查看待办→完成勾选→附加记录作为执行证据"
+
+constraints:
+  hard_limits:
+    - "弱网/噪声环境，交互必须低输入成本"
+    - "IT 团队小，优先 SaaS 化与低运维"
+    - "健康/隐私数据需安全传输与最小权限访问"
+  assumptions_confirmed:
+    - "MVP 先选 1 个院区/楼层/护士站试点"
+    - "登录采用 Supabase Auth（邮箱/短信之一），角色最小化（护工/护士/管理）"
+    - "试点期权限可按站点范围简化，后续细化到责任范围"
+
+success_metrics:
+  - metric_id: "MVP-REC-TIME"
+    target: "护工单次记录平均耗时下降 ≥ 40%"
+    measurement_method: "进入记录页到提交成功的时长分布"
+    data_source: "应用事件日志"
+  - metric_id: "MVP-INC-NOTIFY"
+    target: "紧急上报通知到达 < 30 秒"
+    measurement_method: "事件创建时间与接收方首次拉取/确认时间差"
+    data_source: "事件表 + 拉取/确认日志"
+  - metric_id: "MVP-HO-MISS"
+    target: "交接重点事项遗漏率下降 ≥ 30%"
+    measurement_method: "交接后复盘抽样：关键事项对齐率"
+    data_source: "交接记录 + 质控抽样表（人工）"
+
+solution_hypothesis:
+  value_proposition: "以护工端为入口，把记录、紧急上报与交接变成可追溯的结构化闭环，减少重复沟通与风险升级。"
+  mvp_scope:
+    - "护工端：老人选择/搜索"
+    - "护工端：快速记录（结构化提取预览 + 可编辑确认）"
+    - "护工端：紧急上报（事件工单 + 通知 + 状态流转）"
+    - "护工端：交接补充（自动汇总 + 人工补充 + 存档）"
+    - "护工端：最小任务提醒（可选）"
+  risk_assumptions:
+    - assumption_id: "A-ADOPTION"
+      statement: "护工愿意在现场使用语音/文本记录"
+      probability: "medium"
+      impact: "high"
+      mitigation: "试点种子用户；3 步内完成；允许纸质并行两周"
+    - assumption_id: "A-ASR"
+      statement: "语音识别在护理场景可用"
+      probability: "medium"
+      impact: "medium"
+      mitigation: "关键字段二次确认；护理术语词库；支持手动编辑"
+    - assumption_id: "A-NETWORK"
+      statement: "弱网不影响关键上报链路"
+      probability: "medium"
+      impact: "high"
+      mitigation: "失败重试；Phase 4 增强离线暂存与补传"
+
+open_questions:
+  - "试点院区的登录方式偏好：短信 OTP 还是邮箱？"
+  - "护工与老人责任范围的定义口径：按楼层/站点/分组？"
+  - "紧急上报通知渠道：仅 App 内通知，还是需要短信/电话兜底？"
+

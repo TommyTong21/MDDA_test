@@ -1,0 +1,347 @@
+openapi: 3.0.3
+info:
+  title: Caregiver MVP API
+  version: 0.1.0
+  description: >
+    护工端 MVP 的最小 API 集合：老人列表、记录、紧急上报、交接补充。
+
+servers:
+  - url: /
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/v1/caregiver/residents:
+    get:
+      operationId: caregiver_listResidents
+      summary: 列出护工可见的老人
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  residents:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Resident"
+                required: [residents]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/v1/caregiver/notes:
+    get:
+      operationId: caregiver_listNotes
+      summary: 查询护工记录
+      parameters:
+        - in: query
+          name: resident_id
+          schema: { type: string }
+          required: false
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+          required: false
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  notes:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/CareNote"
+                required: [notes]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: caregiver_createNote
+      summary: 创建一条护工记录
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCareNoteRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CareNote"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/v1/caregiver/incidents:
+    get:
+      operationId: caregiver_listIncidents
+      summary: 查询紧急上报事件
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [open, acknowledged, resolved, archived]
+          required: false
+        - in: query
+          name: resident_id
+          schema: { type: string }
+          required: false
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+          required: false
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  incidents:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Incident"
+                required: [incidents]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: caregiver_createIncident
+      summary: 创建紧急上报事件
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateIncidentRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Incident"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/v1/caregiver/incidents/{incident_id}:
+    patch:
+      operationId: caregiver_updateIncident
+      summary: 更新事件状态（最小闭环）
+      parameters:
+        - in: path
+          name: incident_id
+          schema: { type: string }
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [open, acknowledged, resolved, archived]
+              required: [status]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Incident"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/v1/caregiver/handoffs:
+    get:
+      operationId: caregiver_listHandoffs
+      summary: 查询交接记录
+      parameters:
+        - in: query
+          name: shift_date
+          schema: { type: string, description: "YYYY-MM-DD" }
+          required: false
+        - in: query
+          name: shift_type
+          schema:
+            type: string
+            enum: [day, night]
+          required: false
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+          required: false
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  handoffs:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Handoff"
+                required: [handoffs]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: caregiver_createHandoff
+      summary: 创建交接记录
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateHandoffRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Handoff"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+
+  schemas:
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }
+            trace_id: { type: string }
+          required: [code, message, trace_id]
+      required: [error]
+
+    Resident:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        bed_no: { type: string }
+        care_level: { type: string }
+      required: [id, name, bed_no, care_level]
+
+    CareNote:
+      type: object
+      properties:
+        id: { type: string }
+        resident_id: { type: string }
+        author_id: { type: string }
+        content_raw: { type: string }
+        content_structured:
+          type: object
+          additionalProperties: true
+        created_at: { type: string }
+      required: [id, resident_id, author_id, content_raw, created_at]
+
+    CreateCareNoteRequest:
+      type: object
+      properties:
+        resident_id: { type: string }
+        content_raw: { type: string }
+        content_structured:
+          type: object
+          additionalProperties: true
+      required: [resident_id, content_raw]
+
+    Incident:
+      type: object
+      properties:
+        id: { type: string }
+        resident_id: { type: string }
+        reporter_id: { type: string }
+        type:
+          type: string
+          enum: [fall, fever, refusal, breathing, vitals, other]
+        status:
+          type: string
+          enum: [open, acknowledged, resolved, archived]
+        description: { type: string }
+        created_at: { type: string }
+      required: [id, resident_id, reporter_id, type, status, created_at]
+
+    CreateIncidentRequest:
+      type: object
+      properties:
+        resident_id: { type: string }
+        type:
+          type: string
+          enum: [fall, fever, refusal, breathing, vitals, other]
+        description: { type: string }
+      required: [resident_id, type]
+
+    Handoff:
+      type: object
+      properties:
+        id: { type: string }
+        shift_date: { type: string }
+        shift_type:
+          type: string
+          enum: [day, night]
+        summary: { type: string }
+        created_at: { type: string }
+      required: [id, shift_date, shift_type, summary, created_at]
+
+    CreateHandoffRequest:
+      type: object
+      properties:
+        shift_date: { type: string, description: "YYYY-MM-DD" }
+        shift_type:
+          type: string
+          enum: [day, night]
+        summary: { type: string }
+      required: [shift_date, shift_type, summary]
+

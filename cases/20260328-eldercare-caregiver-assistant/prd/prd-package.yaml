@@ -1,0 +1,176 @@
+case_id: "20260328-eldercare-caregiver-assistant"
+version: "0.1.0"
+created_at: "2026-03-28"
+owner: "product"
+
+prd:
+  title: "AI 康养护理智能助手（护工端 MVP）"
+  one_liner: "让护工现场一线记录更轻、紧急上报更快、交接更完整。"
+
+  problem_space:
+    business_context:
+      - "全国性康养医疗机构，覆盖多城市，老年服务规模 10 万+"
+      - "护理分级 L1–L6，护理记录以纸质 + Excel + 分散系统并行"
+      - "一线人力紧张（护工日工时长、护士查房耗时高），协同成本高"
+    pain_points:
+      - "护理记录繁琐：记录与沟通占用大量时间，信息分散且不可追溯"
+      - "突发事件发现/上报延迟：依赖巡查或老人呼叫，响应慢、风险高"
+      - "交接班信息遗漏：重点事项口头传递，容易丢失与失真"
+      - "个性化照护难：病史/用药/禁忌分散，新人易出错"
+    business_goals:
+      - "护工端：记录—上报—交接闭环跑通"
+      - "护士站：减少重复问答与回溯成本（Phase 4 加强）"
+      - "机构：降低风险事件升级与纠纷概率，提升满意度与留存"
+
+  stakeholders:
+    - role: "护工"
+      jobs:
+        - "在照护现场快速留痕（语音/文本/图片），不打断节奏"
+        - "突发事件快速上报并确保有人接到"
+        - "交接班把本班重点传递清楚，可追溯"
+      pain_points:
+        - "记录工具分散且输入成本高"
+        - "事件上报链路长，容易错过黄金时间"
+        - "交接靠口头，重复解释、遗漏频发"
+    - role: "护士/护士站"
+      jobs:
+        - "及时接收异常与关键记录并闭环处置"
+        - "减少家属与同事重复询问时的翻找成本"
+      pain_points:
+        - "信息不集中，查找与确认耗时"
+        - "异常被淹没或通知不到位"
+    - role: "护士长/管理者"
+      jobs:
+        - "掌握风险事件与响应效率"
+        - "提升交接完整度与执行一致性"
+      pain_points:
+        - "难以量化追踪质量与响应"
+
+  journey:
+    critical_scenarios:
+      - scenario_id: "CG-REC-001"
+        name: "护工现场快速记录"
+        description: "护工在照护现场通过语音/文本/图片完成记录，系统结构化提取并可编辑确认后落库留痕。"
+        success_criteria:
+          - "3 步内完成一次记录提交"
+          - "记录可追溯到创建者与原始输入"
+      - scenario_id: "CG-INC-001"
+        name: "紧急上报（30 秒）"
+        description: "护工一键上报跌倒/不适等事件，自动触达责任护士/护士站并生成可追踪工单。"
+        success_criteria:
+          - "30 秒内完成上报提交"
+          - "通知在 30 秒内送达接收方"
+      - scenario_id: "CG-HO-001"
+        name: "交接补充与存档"
+        description: "系统自动汇总本班重点老人/异常/未完成项，护工补充说明后生成交接记录并存档。"
+        success_criteria:
+          - "交接记录可回放与检索"
+          - "交接内容按优先级分层（重大异常优先）"
+      - scenario_id: "CG-TASK-001"
+        name: "最小任务提醒（可选）"
+        description: "护工查看今日待办并完成勾选，可附加记录作为执行证据。"
+        success_criteria:
+          - "待办完成率可统计"
+
+  scope:
+    in_scope:
+      - "护工端：老人选择/搜索"
+      - "护工端：快速记录（语音/文本/图片入口；结构化字段；可编辑确认）"
+      - "护工端：紧急上报（事件类型、通知、状态流转）"
+      - "护工端：交接补充（自动汇总 + 人工补充 + 存档）"
+      - "护工端：最小任务提醒（可选，轻量）"
+    out_of_scope:
+      - "完整护理平台（医嘱、收费、全量病历）"
+      - "复杂排班优化与自动派单"
+      - "家属端自助查询与消息服务"
+      - "AI 诊断结论/自动决策（仅辅助提取与提示）"
+
+  requirements:
+    must:
+      - "记录：支持语音/文本输入与结构化提取预览"
+      - "记录：提交落库并可追溯（创建者、时间、老人、输入来源）"
+      - "上报：一键进入紧急上报，事件类型可选，支持补充说明与图片"
+      - "上报：提交后生成事件工单，具备状态流转"
+      - "交接：自动汇总本班重点事项并允许补充，形成存档"
+    should:
+      - "待办：显示今日任务并可勾选完成（轻量版本）"
+      - "异常字段二次确认：对高风险字段强制确认"
+      - "历史检索：按老人/时间检索记录与交接"
+    could:
+      - "离线暂存与联网补传（Phase 4 增强）"
+      - "护理术语词库与个性化模板"
+
+  constraints:
+    hard_limits:
+      - "一线弱网与噪声环境，交互必须低输入成本"
+      - "IT 团队小（约 5 人），优先 SaaS 化与低运维"
+      - "健康/隐私数据需安全传输与最小权限访问"
+    assumptions_confirmed:
+      - "MVP 先选 1 个院区/楼层/护士站试点"
+      - "登录采用 Supabase Auth（邮箱/短信之一），角色最小化（护工/护士/管理）"
+      - "试点期权限可按站点范围简化，后续再细化到责任范围"
+
+  data:
+    inputs:
+      - name: "护工输入"
+        examples: ["语音转写文本", "手动文本", "图片"]
+      - name: "基础主数据"
+        examples: ["老人姓名/床位/护理等级", "联系人信息（后续）"]
+    entities:
+      - entity: "resident"
+        key_fields: ["id", "name", "bed_no", "care_level"]
+      - entity: "care_note"
+        key_fields: ["id", "resident_id", "author_id", "content_raw", "content_structured", "created_at"]
+      - entity: "incident"
+        key_fields: ["id", "resident_id", "reporter_id", "type", "status", "created_at"]
+      - entity: "handoff"
+        key_fields: ["id", "shift_date", "shift_type", "summary", "created_at"]
+      - entity: "task"
+        key_fields: ["id", "title", "assignee_id", "due_at", "status"]
+    integrations:
+      - "排班系统/HIS：MVP 不强依赖；Phase 4 逐步对接"
+
+  success_metrics:
+    - metric_id: "MVP-REC-TIME"
+      name: "护工单次记录平均耗时"
+      target: "下降 ≥ 40%"
+      measurement_method: "客户端埋点：进入记录页到提交成功的时长分布"
+      data_source: "应用事件日志（匿名化/最小字段）"
+    - metric_id: "MVP-INC-NOTIFY"
+      name: "紧急上报通知到达时间"
+      target: "< 30 秒"
+      measurement_method: "事件创建时间与接收方首次拉取/确认时间差"
+      data_source: "事件表 + 通知投递记录（或拉取日志）"
+    - metric_id: "MVP-HO-MISS"
+      name: "交接重点事项遗漏率"
+      target: "下降 ≥ 30%"
+      measurement_method: "交接后复盘抽样：关键事项对齐率"
+      data_source: "交接记录 + 质控抽样表（人工）"
+
+  risks:
+    - risk_id: "R-ADOPTION"
+      assumption: "护工愿意在现场使用语音/文本记录"
+      probability: "medium"
+      impact: "high"
+      mitigation: "先试点种子用户；3 步内完成；允许纸质并行两周"
+    - risk_id: "R-ASR"
+      assumption: "语音识别在护理场景可用"
+      probability: "medium"
+      impact: "medium"
+      mitigation: "关键字段二次确认；护理术语词库；支持手动编辑"
+    - risk_id: "R-DATA"
+      assumption: "老人主数据可被快速整理为最小可用集"
+      probability: "high"
+      impact: "medium"
+      mitigation: "MVP 只要求新增数据结构化；主数据先少量手动维护"
+    - risk_id: "R-NETWORK"
+      assumption: "弱网不影响关键上报链路"
+      probability: "medium"
+      impact: "high"
+      mitigation: "提交失败可重试；Phase 4 增强离线暂存与补传"
+
+  open_questions:
+    - "试点院区的登录方式偏好：短信 OTP 还是邮箱？"
+    - "护工与老人责任范围的定义口径：按楼层/站点/分组？"
+    - "紧急上报通知渠道：仅 App 内通知，还是需要短信/电话兜底？"
+

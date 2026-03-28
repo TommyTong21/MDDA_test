@@ -215,6 +215,8 @@ Level 5: PM 重新评估需求（PRD 调整）
 |-----|------|------|
 | 本索引 | `.trae/knowledge/agent-system-index.md` | 所有角色 |
 | SOLO Coder 框架 | `.trae/knowledge/solo-coder-framework.md` | SOLO Coder |
+| UI 技术栈策略 | `.trae/knowledge/ui-stack-strategy.md` | Tech Lead, Frontend, UI Designer |
+| user_gift 资产说明 | `.trae/knowledge/user-gift-assets.md` | 所有角色 |
 | Tech Lead 规范 | `.trae/knowledge/tech-lead-agent.md` | Tech Lead Agent |
 | PM 规范 | `.trae/knowledge/product-manager-agent.md` | PM Agent |
 | Frontend 规范 | `.trae/knowledge/frontend-agent.md` | Frontend Agent |

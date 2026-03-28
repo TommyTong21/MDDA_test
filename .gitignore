@@ -29,3 +29,9 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+
+# large local asset dumps (do not deploy)
+user_gift/
+ui-libraries/
+question_pad.md/
+.vscode/
