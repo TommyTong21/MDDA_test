@@ -1,0 +1,80 @@
+contract_kind: "c1"
+case_id: "20260328-eldercare-caregiver-assistant"
+version: "0.1.1"
+status: "draft"
+created_at: "2026-03-28"
+
+parent:
+  kind: "c0"
+  version: "0.1.0"
+  file: "cases/20260328-eldercare-caregiver-assistant/contracts/c0/c0-v0.1.0.yaml"
+
+scope:
+  mvp_focus: "caregiver"
+  in_scope:
+    - "护工端页面：老人列表、快速记录、紧急上报、交接补充、（可选）任务提醒"
+    - "API：记录/事件/交接/老人列表（最小集合）"
+    - "DB：最小实体表与索引"
+  out_of_scope:
+    - "护士站工作台（Phase 4）"
+    - "短信/电话兜底通知（Phase 4）"
+    - "离线缓存与补传（Phase 4）"
+
+architecture:
+  runtime:
+    web: "Next.js App Router（Vercel）"
+    api: "Next.js Route Handlers（/api/v1）"
+    db: "Supabase Postgres"
+    auth: "Supabase Auth（SSR cookie session）"
+  modules:
+    - name: "caregiver-ui"
+      responsibility:
+        - "护工端页面与交互"
+        - "调用 /api/v1/caregiver/* 完成数据读写"
+    - name: "caregiver-api"
+      responsibility:
+        - "对外提供护工端 API（OpenAPI 定义）"
+        - "鉴权与输入校验"
+        - "调用 DAL 访问数据库"
+    - name: "caregiver-dal"
+      responsibility:
+        - "封装 Supabase 查询与写入"
+        - "统一错误映射与 traceId"
+  data_model:
+    entities:
+      - name: "residents"
+        purpose: "老人主数据（MVP 最小字段）"
+      - name: "care_notes"
+        purpose: "护工记录（原始输入 + 结构化内容）"
+      - name: "incidents"
+        purpose: "紧急上报事件与状态流转（含审计字段与状态机约束）"
+      - name: "handoffs"
+        purpose: "交接补充与自动汇总摘要"
+      - name: "tasks"
+        purpose: "最小任务提醒（可选）"
+
+interfaces:
+  openapi:
+    file: "cases/20260328-eldercare-caregiver-assistant/interfaces/openapi.yaml"
+    frozen: true
+    openapi_sha256: "3d1dfa1b9e90989548e63819840b51b380fd31ebb5c78e1ff91183a2817756aa"
+
+non_functional:
+  security:
+    - "不在前端输出敏感信息与密钥"
+    - "所有写接口必须鉴权"
+    - "MVP 期按站点范围简化授权，后续细化到责任范围"
+  observability:
+    - "所有 API 响应包含 x-trace-id header"
+    - "错误响应 body 包含 trace_id"
+
+verification_plan:
+  fast_lane:
+    - "pnpm lint:fast"
+    - "pnpm build"
+    - "pnpm test:e2e"
+  strict_lane:
+    - "pnpm lint:strict"
+    - "pnpm build"
+    - "pnpm test:e2e"
+

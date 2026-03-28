@@ -1,16 +1,14 @@
 import { getAuthUser } from "@/lib/api/auth"
+import { mapSupabaseError } from "@/lib/api/errorMapping"
 import { jsonError, jsonOk } from "@/lib/api/response"
 import { safeJson } from "@/lib/api/safeJson"
 import { createTraceId } from "@/lib/api/trace"
+import { isRecord, isUuid } from "@/lib/api/validators"
 import { updateIncidentStatus } from "@/lib/caregiver/dal"
 import type { IncidentStatus } from "@/lib/caregiver/types"
 import { createClient } from "@/lib/supabase/server"
 
 const incidentStatuses: readonly IncidentStatus[] = ["open", "acknowledged", "resolved", "archived"] as const
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null
-}
 
 function isIncidentStatus(value: unknown): value is IncidentStatus {
   return typeof value === "string" && (incidentStatuses as readonly string[]).includes(value)
@@ -29,7 +27,7 @@ export async function PATCH(
   if (!user) return jsonError("UNAUTHORIZED", "未登录", 401, traceId)
 
   const { incident_id: incidentId } = await params
-  if (!incidentId) return jsonError("INVALID_ARGUMENT", "incident_id 缺失", 400, traceId)
+  if (!isUuid(incidentId)) return jsonError("INVALID_ARGUMENT", "incident_id 必须是 UUID", 400, traceId)
 
   const bodyRes = await safeJson<unknown>(request)
   if (!bodyRes.ok) return jsonError(bodyRes.error.code, bodyRes.error.message, 400, traceId)
@@ -41,9 +39,11 @@ export async function PATCH(
   try {
     const incident = await updateIncidentStatus(db, { incidentId, status })
     if (!incident) return jsonError("NOT_FOUND", "事件不存在", 404, traceId)
-    return jsonOk(incident, 200)
-  } catch {
+    return jsonOk(incident, 200, traceId)
+  } catch (err) {
+    console.error("PATCH /api/v1/caregiver/incidents/{incident_id} failed", { traceId, err })
+    const mapped = mapSupabaseError(err)
+    if (mapped) return jsonError(mapped.code, mapped.message, mapped.status, traceId)
     return jsonError("INTERNAL", "更新事件失败", 500, traceId)
   }
 }
-

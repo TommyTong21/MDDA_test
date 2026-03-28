@@ -1,24 +1,33 @@
 openapi: 3.0.3
 info:
   title: Caregiver MVP API
-  version: 0.1.0
+  version: 0.1.1
   description: >
     护工端 MVP 的最小 API 集合：老人列表、记录、紧急上报、交接补充。
+    鉴权采用 Supabase SSR Session Cookie（浏览器自动携带 Cookie）。
 
 servers:
   - url: /
 
 security:
-  - bearerAuth: []
+  - cookieAuth: []
 
 paths:
   /api/v1/caregiver/residents:
     get:
       operationId: caregiver_listResidents
       summary: 列出护工可见的老人
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+          required: false
       responses:
         "200":
           description: OK
+          headers:
+            x-trace-id:
+              $ref: "#/components/headers/TraceId"
           content:
             application/json:
               schema:
@@ -48,6 +57,9 @@ paths:
       responses:
         "200":
           description: OK
+          headers:
+            x-trace-id:
+              $ref: "#/components/headers/TraceId"
           content:
             application/json:
               schema:
@@ -72,6 +84,9 @@ paths:
       responses:
         "201":
           description: Created
+          headers:
+            x-trace-id:
+              $ref: "#/components/headers/TraceId"
           content:
             application/json:
               schema:
@@ -103,6 +118,9 @@ paths:
       responses:
         "200":
           description: OK
+          headers:
+            x-trace-id:
+              $ref: "#/components/headers/TraceId"
           content:
             application/json:
               schema:
@@ -127,6 +145,9 @@ paths:
       responses:
         "201":
           description: Created
+          headers:
+            x-trace-id:
+              $ref: "#/components/headers/TraceId"
           content:
             application/json:
               schema:
@@ -159,6 +180,9 @@ paths:
       responses:
         "200":
           description: OK
+          headers:
+            x-trace-id:
+              $ref: "#/components/headers/TraceId"
           content:
             application/json:
               schema:
@@ -192,6 +216,9 @@ paths:
       responses:
         "200":
           description: OK
+          headers:
+            x-trace-id:
+              $ref: "#/components/headers/TraceId"
           content:
             application/json:
               schema:
@@ -216,6 +243,9 @@ paths:
       responses:
         "201":
           description: Created
+          headers:
+            x-trace-id:
+              $ref: "#/components/headers/TraceId"
           content:
             application/json:
               schema:
@@ -227,26 +257,41 @@ paths:
 
 components:
   securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sb-auth-token
+
+  headers:
+    TraceId:
+      description: 请求链路追踪 ID（用于排障）
+      schema:
+        type: string
 
   responses:
     BadRequest:
       description: Bad Request
+      headers:
+        x-trace-id:
+          $ref: "#/components/headers/TraceId"
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/ApiError"
     Unauthorized:
       description: Unauthorized
+      headers:
+        x-trace-id:
+          $ref: "#/components/headers/TraceId"
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/ApiError"
     NotFound:
       description: Not Found
+      headers:
+        x-trace-id:
+          $ref: "#/components/headers/TraceId"
       content:
         application/json:
           schema:
@@ -309,8 +354,16 @@ components:
         status:
           type: string
           enum: [open, acknowledged, resolved, archived]
-        description: { type: string }
+        description:
+          type: string
+          nullable: true
         created_at: { type: string }
+        updated_at:
+          type: string
+          nullable: true
+        updated_by:
+          type: string
+          nullable: true
       required: [id, resident_id, reporter_id, type, status, created_at]
 
     CreateIncidentRequest:
@@ -327,13 +380,14 @@ components:
       type: object
       properties:
         id: { type: string }
+        author_id: { type: string }
         shift_date: { type: string }
         shift_type:
           type: string
           enum: [day, night]
         summary: { type: string }
         created_at: { type: string }
-      required: [id, shift_date, shift_type, summary, created_at]
+      required: [id, author_id, shift_date, shift_type, summary, created_at]
 
     CreateHandoffRequest:
       type: object
@@ -344,4 +398,3 @@ components:
           enum: [day, night]
         summary: { type: string }
       required: [shift_date, shift_type, summary]
-

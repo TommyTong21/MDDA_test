@@ -28,6 +28,8 @@ export interface Incident {
   status: IncidentStatus
   description: string | null
   created_at: string
+  updated_at?: string
+  updated_by?: string | null
 }
 
 export interface Handoff {
@@ -38,4 +40,3 @@ export interface Handoff {
   summary: string
   created_at: string
 }
-

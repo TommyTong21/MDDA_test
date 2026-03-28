@@ -1,17 +1,15 @@
 import { getAuthUser } from "@/lib/api/auth"
+import { mapSupabaseError } from "@/lib/api/errorMapping"
 import { jsonError, jsonOk } from "@/lib/api/response"
 import { safeJson } from "@/lib/api/safeJson"
 import { createTraceId } from "@/lib/api/trace"
+import { isRecord, isUuid, parseIntParam } from "@/lib/api/validators"
 import { createIncident, listIncidents } from "@/lib/caregiver/dal"
 import type { IncidentStatus, IncidentType } from "@/lib/caregiver/types"
 import { createClient } from "@/lib/supabase/server"
 
 const incidentTypes: readonly IncidentType[] = ["fall", "fever", "refusal", "breathing", "vitals", "other"] as const
 const incidentStatuses: readonly IncidentStatus[] = ["open", "acknowledged", "resolved", "archived"] as const
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null
-}
 
 function isIncidentType(value: unknown): value is IncidentType {
   return typeof value === "string" && (incidentTypes as readonly string[]).includes(value)
@@ -33,8 +31,11 @@ export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url)
   const residentId = url.searchParams.get("resident_id") ?? undefined
   const statusRaw = url.searchParams.get("status") ?? undefined
-  const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? "20"), 1), 100)
+  const limit = parseIntParam(url.searchParams, "limit", 20, { min: 1, max: 100 })
 
+  if (residentId !== undefined && !isUuid(residentId)) {
+    return jsonError("INVALID_ARGUMENT", "resident_id 必须是 UUID", 400, traceId)
+  }
   if (statusRaw !== undefined && !isIncidentStatus(statusRaw)) {
     return jsonError("INVALID_ARGUMENT", "status 不合法", 400, traceId)
   }
@@ -45,8 +46,11 @@ export async function GET(request: Request): Promise<Response> {
       status: statusRaw,
       limit,
     })
-    return jsonOk({ incidents }, 200)
-  } catch {
+    return jsonOk({ incidents }, 200, traceId)
+  } catch (err) {
+    console.error("GET /api/v1/caregiver/incidents failed", { traceId, err })
+    const mapped = mapSupabaseError(err)
+    if (mapped) return jsonError(mapped.code, mapped.message, mapped.status, traceId)
     return jsonError("INTERNAL", "查询事件失败", 500, traceId)
   }
 }
@@ -68,14 +72,17 @@ export async function POST(request: Request): Promise<Response> {
   const type = bodyRes.data.type
   const description = bodyRes.data.description
 
-  if (typeof residentId !== "string" || residentId.length === 0) {
-    return jsonError("INVALID_ARGUMENT", "resident_id 必填", 400, traceId)
+  if (!isUuid(residentId)) {
+    return jsonError("INVALID_ARGUMENT", "resident_id 必须是 UUID", 400, traceId)
   }
   if (!isIncidentType(type)) {
     return jsonError("INVALID_ARGUMENT", "type 不合法", 400, traceId)
   }
   if (description !== undefined && description !== null && typeof description !== "string") {
     return jsonError("INVALID_ARGUMENT", "description 必须是字符串", 400, traceId)
+  }
+  if (typeof description === "string" && description.length > 2000) {
+    return jsonError("INVALID_ARGUMENT", "description 过长（最多 2000 字符）", 400, traceId)
   }
 
   try {
@@ -85,9 +92,11 @@ export async function POST(request: Request): Promise<Response> {
       type,
       description: typeof description === "string" ? description : null,
     })
-    return jsonOk(incident, 201)
-  } catch {
+    return jsonOk(incident, 201, traceId)
+  } catch (err) {
+    console.error("POST /api/v1/caregiver/incidents failed", { traceId, err })
+    const mapped = mapSupabaseError(err)
+    if (mapped) return jsonError(mapped.code, mapped.message, mapped.status, traceId)
     return jsonError("INTERNAL", "创建事件失败", 500, traceId)
   }
 }
-

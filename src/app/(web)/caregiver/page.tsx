@@ -278,6 +278,12 @@ export default function CaregiverPage() {
     reloadHandoffs()
   }, [userEmail, reloadResidents, reloadIncidents, reloadHandoffs])
 
+  useEffect(() => {
+    if (!userEmail) return
+    if (!selectedResidentId) return
+    reloadIncidents()
+  }, [userEmail, selectedResidentId, reloadIncidents])
+
   const selectedResident =
     residentsState.status === "ready"
       ? residentsState.data.find((r) => r.id === selectedResidentId) ?? null
@@ -300,7 +306,8 @@ export default function CaregiverPage() {
               </span>
               <button
                 onClick={signOut}
-                className="rounded-md border bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
+                type="button"
+                className="rounded-md border bg-white px-3 py-1.5 text-sm hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60"
               >
                 退出
               </button>
@@ -387,7 +394,8 @@ export default function CaregiverPage() {
             <h2 className="text-base font-semibold">Step 2 · 选择老人</h2>
             <button
               onClick={reloadResidents}
-              className="rounded-md border bg-white px-2 py-1 text-xs hover:bg-slate-50 disabled:opacity-50"
+              type="button"
+              className="rounded-md border bg-white px-2 py-1 text-xs hover:bg-slate-50 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60"
               disabled={!userEmail}
             >
               刷新
@@ -459,7 +467,8 @@ export default function CaregiverPage() {
             <h2 className="text-base font-semibold">紧急上报</h2>
             <button
               onClick={reloadIncidents}
-              className="rounded-md border bg-white px-2 py-1 text-xs hover:bg-slate-50 disabled:opacity-50"
+              type="button"
+              className="rounded-md border bg-white px-2 py-1 text-xs hover:bg-slate-50 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60"
               disabled={!userEmail}
             >
               刷新
@@ -534,9 +543,12 @@ export default function CaregiverPage() {
                           {incidentStatusLabel(it.status)}
                         </span>
                       </div>
-                      <div className="text-xs text-slate-500">
+                      <time
+                        className="text-xs text-slate-500"
+                        dateTime={new Date(it.created_at).toISOString()}
+                      >
                         {new Date(it.created_at).toLocaleString()}
-                      </div>
+                      </time>
                     </div>
                     {it.description ? <div className="mt-1 text-slate-700">{it.description}</div> : null}
                   </li>
@@ -551,7 +563,8 @@ export default function CaregiverPage() {
             <h2 className="text-base font-semibold">交接补充</h2>
             <button
               onClick={reloadHandoffs}
-              className="rounded-md border bg-white px-2 py-1 text-xs hover:bg-slate-50 disabled:opacity-50"
+              type="button"
+              className="rounded-md border bg-white px-2 py-1 text-xs hover:bg-slate-50 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60"
               disabled={!userEmail}
             >
               刷新
@@ -618,7 +631,12 @@ export default function CaregiverPage() {
                           {it.shift_type === "day" ? "白班" : "夜班"}
                         </span>
                       </div>
-                      <div className="text-xs text-slate-500">{new Date(it.created_at).toLocaleString()}</div>
+                      <time
+                        className="text-xs text-slate-500"
+                        dateTime={new Date(it.created_at).toISOString()}
+                      >
+                        {new Date(it.created_at).toLocaleString()}
+                      </time>
                     </div>
                     <div className="mt-1 whitespace-pre-wrap text-slate-700">{it.summary}</div>
                   </li>

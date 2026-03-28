@@ -74,7 +74,7 @@ export async function createIncident(
       type: input.type,
       description: input.description,
     })
-    .select("id,resident_id,reporter_id,type,status,description,created_at")
+    .select("id,resident_id,reporter_id,type,status,description,created_at,updated_at,updated_by")
     .single()
 
   if (error) throw error
@@ -90,7 +90,7 @@ export async function listIncidents(
 ): Promise<Incident[]> {
   let q = db
     .from("incidents")
-    .select("id,resident_id,reporter_id,type,status,description,created_at")
+    .select("id,resident_id,reporter_id,type,status,description,created_at,updated_at,updated_by")
     .order("created_at", { ascending: false })
     .limit(input.limit)
 
@@ -113,7 +113,7 @@ export async function updateIncidentStatus(
     .from("incidents")
     .update({ status: input.status })
     .eq("id", input.incidentId)
-    .select("id,resident_id,reporter_id,type,status,description,created_at")
+    .select("id,resident_id,reporter_id,type,status,description,created_at,updated_at,updated_by")
     .maybeSingle()
 
   if (error) throw error
@@ -162,4 +162,3 @@ export async function listHandoffs(
   if (error) throw error
   return (data ?? []) as Handoff[]
 }
-
